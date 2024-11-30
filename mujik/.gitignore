@@ -12,7 +12,7 @@
 
 # testing
 /coverage
-
+src/app/api/streams/test.json
 # next.js
 /.next/
 /out/

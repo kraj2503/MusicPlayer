@@ -11,9 +11,11 @@ const handler = NextAuth({
   ],
   callbacks: {
     async signIn(params) {
+      // console.log("Params: ",params);
       if (!params.user.email) {
         return false;
       }
+      console.log("mail is there",);
 
       try {
         await prisma.user.create({
@@ -23,7 +25,7 @@ const handler = NextAuth({
           },
         });
       } catch (e) {
-        return false;
+        // console.log(e);
       }
       return true;
     },
