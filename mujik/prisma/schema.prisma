@@ -33,15 +33,17 @@ model Stream {
   upvotes     Upvote[]
   userId      String
   user        User       @relation(fields: [userId], references: [id])
+  Time        DateTime   @default(now())
 }
 
 // do this in redis
 model Upvote {
-  id       String @id @default(uuid())
+  id       String   @id @default(uuid())
   userId   String
   streamId String
-  user     User   @relation(fields: [userId], references: [id])
-  stream   Stream @relation(fields: [streamId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  stream   Stream   @relation(fields: [streamId], references: [id])
+  Time     DateTime @default(now())
 
   @@unique([userId, streamId])
 }
