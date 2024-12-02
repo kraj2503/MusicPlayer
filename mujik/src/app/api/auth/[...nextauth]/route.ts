@@ -9,6 +9,7 @@ const handler = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     }),
   ],
+  secret: process.env.NEXTAUTH_SECRET??"",
   callbacks: {
     async signIn(params) {
       // console.log("Params: ",params);
@@ -24,6 +25,7 @@ const handler = NextAuth({
             provider: "Google",
           },
         });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         // console.log(e);
       }
