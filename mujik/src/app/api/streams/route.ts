@@ -2,23 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/app/lib/db";
 
-//@ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import youtubesearchapi from "youtube-search-api";
+import { urlRegex } from "@/app/lib/utils";
+import { getServerSession } from "next-auth";
 const CreateStreamSchema = z.object({
-  createrId: z.string(),
-  url: z
-    .string()
-    .refine((val) => val.includes("youtube") || val.includes("Spotify"), {
-      message: "URL must be from Youtube or Spotify",
-    }),
+  creatorId: z.string(),
+  url: z.string(),
 });
 
-const urlRegex =
-  /^(?:(?:https?:)?\/\/)?(?:www\.)?(?:m\.)?(?:youtu(?:be)?\.com\/(?:v\/|embed\/|watch(?:\/|\?v=))|youtu\.be\/)((?:\w|-){11})(?:\S+)?$/;
+const MAX_QUEUE_LEN = 20;
 
 export async function POST(req: NextRequest) {
   try {
     const data = CreateStreamSchema.parse(await req.json());
+    console.log("data", data);
+
     const isYoutube = data.url.match(urlRegex);
     if (!isYoutube) {
       return NextResponse.json(
@@ -34,39 +33,60 @@ export async function POST(req: NextRequest) {
 
     const res = await youtubesearchapi.GetVideoDetails(extractedId);
     // console.log("Title",yt.title);
-    console.log(res);
-    let thumbnail = [];
-    if (res.thumbnail && res.thumbnail.thumbnails) {
-      thumbnail = res.thumbnail.thumbnails;
-      console.log("Thumbnail", thumbnail);
+    // console.log(res);
+    const thumbnails = res.thumbnail.thumbnails;
+    thumbnails.sort((a: { width: number }, b: { width: number }) =>
+      a.width < b.width ? -1 : 1
+    );
 
-      // Sort the thumbnails by width
-      thumbnail.sort((a: { width: number }, b: { width: number }) =>
-        a.width < b.width ? -1 : 1
-      );
-    }
+    // if (res.thumbnail && res.thumbnail.thumbnails) {
+    //   thumbnail = res.thumbnail.thumbnails;
+    //   console.log("Thumbnail", thumbnail);
+
+    //   // Sort the thumbnails by width
+    // }
 
     const bigImg =
-      thumbnail.length > 0 ? thumbnail[thumbnail.length - 1].url : "";
+      thumbnails.length > 0 ? thumbnails[thumbnails.length - 1].url : "";
     const smallImg =
-      thumbnail.length > 1 ? thumbnail[thumbnail.length - 2].url : bigImg;
+      thumbnails.length > 1 ? thumbnails[thumbnails.length - 2].url : bigImg;
 
+    const existingActiveStream = await prisma.stream.count({
+      where: {
+        userId: data.creatorId,
+      },
+    });
+
+    if (existingActiveStream > MAX_QUEUE_LEN) {
+      return NextResponse.json(
+        {
+          message: "Already at limit",
+        },
+        {
+          status: 411,
+        }
+      );
+    }
+    console.log(data.creatorId); 
     const stream = await prisma.stream.create({
       data: {
-        userId: data.createrId,
+        userId: data.creatorId,
         url: data.url,
         extractedId,
         type: "Youtube",
         title: res.title,
-        bigImg: bigImg,
-        smallimg: smallImg,
+        bigImg: bigImg ?? "",
+        smallimg: smallImg ?? "",
+        addedById:data.creatorId
       },
     });
+    console.log("12");
 
     return NextResponse.json(
       {
-        message: "Added Stream",
-        id: stream.id,
+        ...stream,
+        hasUpvoted: false,
+        upvotes: 0,
       },
       {
         status: 200,
@@ -76,7 +96,7 @@ export async function POST(req: NextRequest) {
     console.log(e);
     return NextResponse.json(
       {
-        message: "Error parsing url",
+        message: "Error adding Stream",
       },
       {
         status: 411,
@@ -86,14 +106,70 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const createrId = req.nextUrl.searchParams.get("createrId");
-  const streams = await prisma.stream.findMany({
+  const creatorId = req.nextUrl.searchParams.get("creatorId");
+  const session = await getServerSession();
+  const user = await prisma.user.findFirst({
     where: {
-      userId: createrId ?? "",
+      email: session?.user?.email ?? "",
     },
   });
 
+  if (!user) {
+    return NextResponse.json(
+      {
+        message: "Unauthenticated",
+      },
+      {
+        status: 403,
+      }
+    );
+  }
+
+  if (!creatorId) {
+    return NextResponse.json(
+      {
+        message: "Error",
+      },
+      {
+        status: 411,
+      }
+    );
+  }
+  const [streams, activeStream] = await Promise.all([
+    await prisma.stream.findMany({
+      where: {
+        userId: creatorId,
+        played: false,
+      },
+      include: {
+        _count: {
+          select: {
+            upvotes: true,
+          },
+        },
+        upvotes: {
+          where: {
+            userId: user.id,
+          },
+        },
+      },
+    }),
+    prisma.currentStream.findFirst({
+      where: {
+        userId: creatorId,
+      },
+      include: {
+        stream: true,
+      },
+    }),
+  ]);
+
   return NextResponse.json({
-    streams,
+    streams: streams.map(({ _count, ...rest }) => ({
+      ...rest,
+      upvotes: _count.upvotes,
+      haveUpvoted: rest.upvotes.length ? true : false,
+    })),
+    activeStream,
   });
 }

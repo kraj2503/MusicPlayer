@@ -38,7 +38,8 @@ export async function POST(req: NextRequest) {
         },
       },
     });
-  } catch (e:any) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (e) {
     return NextResponse.json(
       {
         message: "cannot upvote",
