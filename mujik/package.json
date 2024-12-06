@@ -15,6 +15,7 @@
     "next-auth": "^4.24.10",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-lite-youtube-embed": "^2.4.0",
     "youtube-player": "^5.6.0",
     "youtube-search-api": "^1.2.2",
     "zod": "^3.23.8"

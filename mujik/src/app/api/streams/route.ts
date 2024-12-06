@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
         addedById:data.creatorId
       },
     });
-    console.log("12");
+;
 
     return NextResponse.json(
       {

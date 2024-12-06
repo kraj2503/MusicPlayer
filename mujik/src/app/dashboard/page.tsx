@@ -5,7 +5,9 @@ import { useState, useEffect, useRef } from "react";
 //@ts-ignore
 import YouTubePlayer from "youtube-player";
 import Image from "next/image";
-
+import LiteYouTubeEmbed from 'react-lite-youtube-embed';
+import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
+import { urlRegex } from "@/app/lib/utils";
 interface Video {
   id: string;
   type: string;
@@ -21,14 +23,14 @@ interface Video {
 }
 
 export default function Page({
-  creatorId= "43b03ac6-b0c8-4bde-abc6-e0cdbf967eef",
+  creatorId = "43b03ac6-b0c8-4bde-abc6-e0cdbf967eef",
   playVideo = false,
 }: {
   creatorId: string;
   playVideo: boolean;
 }) {
   const REFRESH_INTERVAL_MS = 10000;
-  const [queue, setQueue] = useState<Video[]>();
+  const [queue, setQueue] = useState<Video[]>([]);
   const [currentVideo, setCurrentVideo] = useState<Video | null>(null);
   const [inputLink, setInputLink] = useState("");
   const [loading, setLoading] = useState(false);
@@ -44,6 +46,7 @@ export default function Page({
     );
 
     setCurrentVideo((video) => {
+      console.log(json.activeStream?.stream?.id);
       if (video?.id === json.activeStream?.stream?.id) {
         return video;
       }
@@ -52,7 +55,7 @@ export default function Page({
   }
 
   // useEffect(() => {
-    // refreshStreams();
+  // refreshStreams();
   //   const interval = setInterval(() => {
   //     refreshStreams();
   //   }, REFRESH_INTERVAL_MS);
@@ -61,14 +64,15 @@ export default function Page({
 
   useEffect(() => {
     if (!videoPlayerRef.current) {
+      console.log("Faileddddd");
       return;
     }
 
     const player = YouTubePlayer(videoPlayerRef.current);
-
+    console.log("player", player);
     player.loadVideoById(currentVideo?.extractedId);
-
-    // 'playVideo' is queue until the player is ready to received API calls and after 'loadVideoById' has been called.
+    console.log(currentVideo?.extractedId);
+    // 'playVideo' is queue until the player is ready to received API calls and after 'loadVideoById' has been called.d
     player.playVideo();
     function eventHandler(event: any) {
       console.log(event);
@@ -126,33 +130,44 @@ export default function Page({
   return (
     <div>
       <Appbar />
-      <div>this is dashboard prob</div>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="paste link here"
-          value={inputLink}
-          onChange={(e) => {
-            setInputLink(e.target.value);
-          }}
-        />
-        <button
-          onClick={() => {
-            fetch("/api/streams", {
-              method: "POST",
-              body: JSON.stringify({
-                createrId: "creatorId",
-                url: inputLink,
-              }),
-            });
-          }}
-        >
-          Add to queue
-        </button>
-      </form>
-      {/* <button onClick={handleVote(video.id, video.haveUpvoted?false:true)}>
-        vote 
-      </button> */}
+      <div className=" flex justify-center">
+        <div className=" ">
+          <div>this is dashboard prob</div>
+          <div>
+            <form onSubmit={handleSubmit}>
+              <input
+                className="text-black p-2"
+                type="text"
+                placeholder="paste link here"
+                value={inputLink}
+                onChange={(e) => {
+                  setInputLink(e.target.value);
+                }}
+              />
+              <button
+                className=" m-5 p-2 rounded-2xl bg-red-600"
+                onClick={() => {
+                  fetch("/api/streams", {
+                    method: "POST",
+                    body: JSON.stringify({
+                      createrId: creatorId,
+                      url: inputLink,
+                    }),
+                  });
+                }}
+              >
+                Add to queue
+              </button>
+            </form>
+            {inputLink && inputLink.match(urlRegex) &&  !loading && (
+              <div className="p-2 mt-10">
+           
+                <LiteYouTubeEmbed title="" id={inputLink.split("v=")[1]}   />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
