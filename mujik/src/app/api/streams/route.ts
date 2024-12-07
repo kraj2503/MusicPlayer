@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
         }
       );
     }
-    console.log(data.creatorId); 
+    console.log(data.creatorId);
     const stream = await prisma.stream.create({
       data: {
         userId: data.creatorId,
@@ -77,16 +77,17 @@ export async function POST(req: NextRequest) {
         title: res.title,
         bigImg: bigImg ?? "",
         smallimg: smallImg ?? "",
-        addedById:data.creatorId
+        addedById: data.creatorId,
       },
     });
-;
+   
 
     return NextResponse.json(
       {
         ...stream,
         hasUpvoted: false,
-        upvotes: 0,
+        upvotes: 1,
+     
       },
       {
         status: 200,

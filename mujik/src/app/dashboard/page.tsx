@@ -5,9 +5,17 @@ import { useState, useEffect, useRef } from "react";
 //@ts-ignore
 import YouTubePlayer from "youtube-player";
 import Image from "next/image";
-import LiteYouTubeEmbed from 'react-lite-youtube-embed';
-import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
+import LiteYouTubeEmbed from "react-lite-youtube-embed";
+import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import { urlRegex } from "@/app/lib/utils";
+import {
+  ChevronUp,
+  ChevronDown,
+  ThumbsDown,
+  Play,
+  Share2,
+  Axis3DIcon,
+} from "lucide-react";
 interface Video {
   id: string;
   type: string;
@@ -54,13 +62,13 @@ export default function Page({
     });
   }
 
-  // useEffect(() => {
-  // refreshStreams();
-  //   const interval = setInterval(() => {
-  //     refreshStreams();
-  //   }, REFRESH_INTERVAL_MS);
-  //   return () => clearInterval(interval);
-  // }, []);
+  useEffect(() => {
+    refreshStreams();
+    const interval = setInterval(() => {
+      refreshStreams();
+    }, REFRESH_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!videoPlayerRef.current) {
@@ -124,6 +132,7 @@ export default function Page({
       }),
     });
     setQueue([...queue, await res.json()]);
+    console.log(queue);
     setLoading(false);
     setInputLink("");
   };
@@ -146,25 +155,60 @@ export default function Page({
               />
               <button
                 className=" m-5 p-2 rounded-2xl bg-red-600"
-                onClick={() => {
-                  fetch("/api/streams", {
-                    method: "POST",
-                    body: JSON.stringify({
-                      createrId: creatorId,
-                      url: inputLink,
-                    }),
-                  });
-                }}
+                onClick={handleSubmit}
               >
                 Add to queue
               </button>
             </form>
-            {inputLink && inputLink.match(urlRegex) &&  !loading && (
+            {inputLink && inputLink.match(urlRegex) && !loading && (
               <div className="p-2 mt-10">
-           
-                <LiteYouTubeEmbed title="" id={inputLink.split("v=")[1]}   />
+                <LiteYouTubeEmbed title="" id={inputLink.split("v=")[1]} />
               </div>
             )}
+          </div>
+
+
+
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-white">Upcoming Songs</h2>
+            {queue.length === 0 && (
+              <div className="bg-gray-900 border-gray-800 w-full">
+                <div className="p-4">
+                  <p className="text-center py-8 text-gray-400">
+                    No videos in queue
+                  </p>
+                </div>
+              </div>
+            )}
+            {queue.map((video) => (
+              <div key={video.id} className="bg-gray-900 border-gray-800">
+                <div className="p-4 flex items-center space-x-4">
+                  <img
+                    src={video.smallimg}
+                    alt={`Thumbnail for ${video.title}`}
+                    className="w-30 h-20 object-cover rounded"
+                  />
+                  <div className="flex-grow">
+                    <h3 className="font-semibold text-white">{video.title}</h3>
+                    <div className="flex items-center space-x-2 mt-2">
+                      <button
+                        onClick={() =>
+                          handleVote(video.id, video.haveUpvoted ? false : true)
+                        }
+                        className="flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+                      >
+                        {video.haveUpvoted ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                        <span>{video.upvotes}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
