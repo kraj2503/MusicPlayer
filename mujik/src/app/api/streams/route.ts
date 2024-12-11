@@ -129,7 +129,7 @@ export async function GET(req: NextRequest) {
   if (!creatorId) {
     return NextResponse.json(
       {
-        message: "Error",
+        message: "Need CreatorId",
       },
       {
         status: 411,

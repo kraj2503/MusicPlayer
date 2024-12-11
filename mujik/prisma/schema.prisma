@@ -32,12 +32,13 @@ model Stream {
   extractedId   String
   active        Boolean        @default(true)
   addedById     String
+  playedTs      DateTime?
   upvotes       Upvote[]
   userId        String
   user          User           @relation(fields: [userId], references: [id], name: "user")
   addedBy       User           @relation(fields: [addedById], references: [id], name: "addedBy")
   currentStream CurrentStream?
-   played        Boolean    @default(false)
+  played        Boolean        @default(false)
 }
 
 model CurrentStream {

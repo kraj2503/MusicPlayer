@@ -1,7 +1,5 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 import { Appbar } from "@/components/Appbar";
-import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 //@ts-ignore
 import YouTubePlayer from "youtube-player";
@@ -17,18 +15,34 @@ import {
   Share2,
   Axis3DIcon,
 } from "lucide-react";
+
+interface Video {
+  id: string;
+  type: string;
+  url: string;
+  title: string;
+  smallimg: string;
+  bigImg: string;
+  extractedId: string;
+  active: boolean;
+  upvotes: number;
+  userId: string;
+  haveUpvoted: boolean;
+}
+
 export default function Stream({
   creatorId,
-}: // playVideo =false,
-{
+  playVideo = false,
+}: {
   creatorId: string;
   playVideo: boolean;
 }) {
-  const REFRESH_INTERVAL_MS = 100000;
+  const REFRESH_INTERVAL_MS = 10000000;
   const [queue, setQueue] = useState<Video[]>([]);
   const [currentVideo, setCurrentVideo] = useState<Video | null>(null);
   const [inputLink, setInputLink] = useState("");
   const [loading, setLoading] = useState(false);
+  const [playNextLoader, setPlayNextLoader] = useState(false);
   const videoPlayerRef = useRef<HTMLDivElement>();
 
   async function refreshStreams() {
@@ -40,8 +54,7 @@ export default function Stream({
       json.streams.sort((a: any, b: any) => (a.upvotes < b.upvotes ? 1 : -1))
     );
 
-    setCurrentVideo((video) => {
-      console.log(json.activeStream?.stream?.id);
+    setCurrentVideo(video => {
       if (video?.id === json.activeStream?.stream?.id) {
         return video;
       }
@@ -59,28 +72,27 @@ export default function Stream({
 
   useEffect(() => {
     if (!videoPlayerRef.current) {
-      console.log("Faileddddd");
-      return;
+        return;
     }
-
-    const player = YouTubePlayer(videoPlayerRef.current);
-    console.log("player", player);
+    let player = YouTubePlayer(videoPlayerRef.current);
+    
+    // 'loadVideoById' is queued until the player is ready to receive API calls.
     player.loadVideoById(currentVideo?.extractedId);
-    console.log(currentVideo?.extractedId);
-    // 'playVideo' is queue until the player is ready to received API calls and after 'loadVideoById' has been called.d
+    
+    // 'playVideo' is queue until the player is ready to received API calls and after 'loadVideoById' has been called.
     player.playVideo();
     function eventHandler(event: any) {
-      console.log(event);
-      console.log(event.data);
-      if (event.data === 0) {
-        playNext();
-      }
-    }
-    player.on("stateChange", eventHandler);
-    return () => {
-      player.destroy();
+        console.log(event);
+        console.log(event.data);
+        if (event.data === 0) {
+            playNext();
+        }
     };
-  }, [currentVideo, videoPlayerRef]);
+    player.on('stateChange', eventHandler);
+    return () => {
+        player.destroy();
+    }
+  }, [currentVideo, videoPlayerRef])
 
   const handleVote = (id: string, isUpvote: boolean) => {
     setQueue(
@@ -148,6 +160,20 @@ export default function Stream({
     setLoading(false);
     setInputLink("");
   };
+  const playNext = async () => {
+    if (queue.length > 0) {
+      try {
+        const data = await fetch("/api/streams/next", {
+          method: "GET",
+        });
+        const json = await data.json();
+        setCurrentVideo(json.stream);
+        setQueue((q) => q.filter((x) => x.id !== json.stream?.id));
+      } catch (e) {}
+    
+    }
+    setPlayNextLoader(false)
+  };
 
   const handleShare = () => {
     // const shareableLink  = `${window.location.hostname}/creator/${creatorId}`
@@ -171,12 +197,6 @@ export default function Stream({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-1 ">
-          <button
-            className="mt-4  bg-red-600"
-            onClick={handleShare}
-          >
-            share link{" "}
-          </button>
           <div className=" flex justify-center">
             <div className=" ">
               <div>this is dashboard prob</div>
@@ -263,12 +283,47 @@ export default function Stream({
             </div>
           </div>
         </div>
-              <div className="col-span-1 ">
+        <div className="col-span-1 ">
+          <div className=" ml-10 mt-24">
+            <button className="mt-4  bg-red-600" onClick={handleShare}>
+              share link{" "}
+            </button>
 
-
-
-
+            <div className="space-y-4 ">
+              <h2 className="text-2xl font-bold text-white">Now Playing</h2>
+              <div className="bg-slate-600 w-5/6 h-auto">
+                {currentVideo ? (
+                  <div className="">
+                    {playVideo ? (
+                      <>
+                        {/* @ts-ignore */}
+                        <div ref={videoPlayerRef} className="w-full " />
+                        {/* <iframe width={"100%"} height={300} src={`https://www.youtube.com/embed/${currentVideo.extractedId}?autoplay=1`} allow="autoplay"></iframe> */}
+                      </>
+                    ) : (
+                      <>
+                        <img
+                          src={currentVideo.bigImg}
+                          className="w-full h-72 object-cover rounded"
+                        />
+                        <p className="mt-2 text-center font-semibold text-white">
+                          {currentVideo.title}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-center py-8 text-gray-400">
+                    No video playing
+                  </p>
+                )}
               </div>
+              {playVideo && <button disabled={playNextLoader} onClick={playNext} className="w-full bg-purple-700 hover:bg-purple-800 text-white">
+                            <Play className="mr-2 h-4 w-4" /> {playNextLoader ? "Loading..." : "Play next"}
+                        </button>}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
