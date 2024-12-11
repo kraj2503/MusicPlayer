@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/app/lib/db";
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-expect-error : Types not available
 import youtubesearchapi from "youtube-search-api";
 import { urlRegex } from "@/app/lib/utils";
 import { getServerSession } from "next-auth";
@@ -29,7 +28,7 @@ export async function POST(req: NextRequest) {
         }
       );
     }
-    const extractedId = data.url.split("?v=")[1];
+    const extractedId = isYoutube[1]
 
     const res = await youtubesearchapi.GetVideoDetails(extractedId);
     // console.log("Title",yt.title);

@@ -1,8 +1,15 @@
 import Stream from "@/components/Stream";
 
-export default async function Creator({ params }) {
-  const { creatorId } = await params;
-  console.log("Here in creatro id");
-  console.log(creatorId);
-  return <Stream creatorId={creatorId} playVideo={false} />;
+export default function Creator({ params }: { params: { creatorId: string } }) {
+  const { creatorId } = params;
+
+  if (!creatorId) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div>
+      <Stream creatorId={creatorId} playVideo={false} />
+    </div>
+  );
 }

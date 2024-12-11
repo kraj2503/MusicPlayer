@@ -1,20 +1,13 @@
 "use client";
 import { Appbar } from "@/components/Appbar";
 import { useState, useEffect, useRef } from "react";
-//@ts-ignore
+//@ts-expect-error : Types not available
 import YouTubePlayer from "youtube-player";
 import Image from "next/image";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import { urlRegex } from "@/app/lib/utils";
-import {
-  ChevronUp,
-  ChevronDown,
-  ThumbsDown,
-  Play,
-  Share2,
-  Axis3DIcon,
-} from "lucide-react";
+import { ChevronUp, ChevronDown, Play } from "lucide-react";
 
 interface Video {
   id: string;
@@ -28,6 +21,11 @@ interface Video {
   upvotes: number;
   userId: string;
   haveUpvoted: boolean;
+}
+
+interface StreamResponse {
+  streams: Video[];
+  activeStream: { stream: Video };
 }
 
 export default function Stream({
@@ -49,12 +47,11 @@ export default function Stream({
     const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
       credentials: "include",
     });
-    const json = await res.json();
-    setQueue(
-      json.streams.sort((a: any, b: any) => (a.upvotes < b.upvotes ? 1 : -1))
-    );
 
-    setCurrentVideo(video => {
+    const json: StreamResponse = await res.json();
+    setQueue(json.streams.sort((a, b) => (a.upvotes < b.upvotes ? 1 : -1)));
+
+    setCurrentVideo((video) => {
       if (video?.id === json.activeStream?.stream?.id) {
         return video;
       }
@@ -72,27 +69,28 @@ export default function Stream({
 
   useEffect(() => {
     if (!videoPlayerRef.current) {
-        return;
+      return;
     }
-    let player = YouTubePlayer(videoPlayerRef.current);
-    
+    const player = YouTubePlayer(videoPlayerRef.current);
+
     // 'loadVideoById' is queued until the player is ready to receive API calls.
     player.loadVideoById(currentVideo?.extractedId);
-    
+
     // 'playVideo' is queue until the player is ready to received API calls and after 'loadVideoById' has been called.
     player.playVideo();
-    function eventHandler(event: any) {
-        console.log(event);
-        console.log(event.data);
-        if (event.data === 0) {
-            playNext();
-        }
-    };
-    player.on('stateChange', eventHandler);
-    return () => {
-        player.destroy();
+
+    function eventHandler(event: { data: number }) {
+      console.log(event);
+      console.log(event.data);
+      if (event.data === 0) {
+        playNext();
+      }
     }
-  }, [currentVideo, videoPlayerRef])
+    player.on("stateChange", eventHandler);
+    return () => {
+      player.destroy();
+    };
+  }, [currentVideo, videoPlayerRef]);
 
   const handleVote = (id: string, isUpvote: boolean) => {
     setQueue(
@@ -142,7 +140,7 @@ export default function Stream({
     }
   };
 
-  const clearQueue = async (e) => {
+  const clearQueue = async () => {
     setLoading(true);
     console.log(loading);
     const res = await fetch("api/streams/clearQueue", {
@@ -169,10 +167,11 @@ export default function Stream({
         const json = await data.json();
         setCurrentVideo(json.stream);
         setQueue((q) => q.filter((x) => x.id !== json.stream?.id));
-      } catch (e) {}
-    
+      } catch (e) {
+        console.log(e);
+      }
     }
-    setPlayNextLoader(false)
+    setPlayNextLoader(false);
   };
 
   const handleShare = () => {
@@ -196,9 +195,10 @@ export default function Stream({
       <Appbar />
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="col-span-1 ">
-          <div className=" flex justify-center">
-            <div className=" ">
+        {/* Left Section */}
+        <div className="col-span-1">
+          <div className="flex justify-center">
+            <div>
               <div>this is dashboard prob</div>
               <div>
                 <form onSubmit={handleSubmit}>
@@ -207,105 +207,127 @@ export default function Stream({
                     type="text"
                     placeholder="paste link here"
                     value={inputLink}
-                    onChange={(e) => {
-                      setInputLink(e.target.value);
-                    }}
+                    onChange={(e) => setInputLink(e.target.value)}
                   />
                   <button
                     disabled={loading}
                     onClick={handleSubmit}
-                    className=" m-5 p-2 rounded-2xl bg-red-600"
+                    className="m-5 p-2 rounded-2xl bg-red-600"
                   >
                     {loading ? "Loading" : "Add to queue"}
                   </button>
                 </form>
-                {inputLink && inputLink.match(urlRegex) && !loading && (
-                  <div className="p-2 mt-10">
-                    <LiteYouTubeEmbed title="" id={inputLink.split("v=")[1]} />
-                  </div>
-                )}
-              </div>
 
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-white">
-                  Upcoming Songs
-                </h2>
-                {queue.length === 0 && (
-                  <div className="bg-gray-900 border-gray-800 w-full">
-                    <div className="p-4">
-                      <p className="text-center py-8 text-gray-400">
-                        No videos in queue
-                      </p>
+                {inputLink &&
+                  !loading &&
+                  (() => {
+                    const match = inputLink.match(urlRegex);
+                    if (match) {
+                      const videoId = match[1];
+                      return (
+                        <div className="p-2 mt-10">
+                          {/* {videoId} */}
+                          <LiteYouTubeEmbed id={videoId} title={""} />
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold text-white">
+                    Upcoming Songs
+                  </h2>
+                  {queue.length === 0 && (
+                    <div className="bg-gray-900 border-gray-800 w-full">
+                      <div className="p-4">
+                        <p className="text-center py-8 text-gray-400">
+                          No videos in queue
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                <div>
-                  <button onClick={clearQueue} disabled={loading}>
-                    {loading ? "Loading" : "Clear Queue"}
-                  </button>
-                </div>
-                {queue.map((video) => (
-                  <div key={video.id} className="bg-gray-900 border-gray-800">
-                    <div className="p-4 flex items-center space-x-4">
-                      <img
-                        src={video.smallimg}
-                        alt={`Thumbnail for ${video.title}`}
-                        className="w-30 h-20 object-cover rounded"
-                      />
-                      <div className="flex-grow">
-                        <h3 className="font-semibold text-white">
-                          {video.title}
-                        </h3>
-                        <div className="flex items-center space-x-2 mt-2">
-                          <button
-                            onClick={() =>
-                              handleVote(
-                                video.id,
-                                video.haveUpvoted ? false : true
-                              )
-                            }
-                            className="flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
-                          >
-                            {video.haveUpvoted ? (
-                              <ChevronUp className="h-4 w-4" />
-                            ) : (
-                              <ChevronDown className="h-4 w-4" />
-                            )}
-                            <span>{video.upvotes}</span>
-                          </button>
+                  <div>
+                    <button onClick={clearQueue} disabled={loading}>
+                      {loading ? "Loading" : "Clear Queue"}
+                    </button>
+                  </div>
+                  {queue.map((video) => (
+                    <div key={video.id} className="bg-gray-900 border-gray-800">
+                      <div className="p-4 flex items-center space-x-4">
+                        <Image
+                          src={video.smallimg}
+                          alt={`Thumbnail for ${video.title}`}
+                          width={120} // 30 * 4 (Tailwind's default 1rem = 4px)
+                          height={80} // 20 * 4
+                          className="object-cover rounded"
+                        />
+                        <div className="flex-grow">
+                          <h3 className="font-semibold text-white">
+                            {video.title}
+                          </h3>
+                          <div className="flex items-center space-x-2 mt-2">
+                            <button
+                              onClick={() =>
+                                handleVote(
+                                  video.id,
+                                  video.haveUpvoted ? false : true
+                                )
+                              }
+                              className="flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+                            >
+                              {video.haveUpvoted ? (
+                                <ChevronUp className="h-4 w-4" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4" />
+                              )}
+                              <span>{video.upvotes}</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div className="col-span-1 ">
-          <div className=" ml-10 mt-24">
-            <button className="mt-4  bg-red-600" onClick={handleShare}>
-              share link{" "}
-            </button>
 
-            <div className="space-y-4 ">
+        {/* Right Section */}
+        <div className="col-span-1">
+          <div className="ml-10 mt-24">
+            <div className="flex justify-end">
+              <button
+                className="mt-4 mr-10 bg-red-600 p-2 rounded-lg"
+                onClick={handleShare}
+              >
+                Share Link
+              </button>
+            </div>
+
+            <div className="space-y-4">
               <h2 className="text-2xl font-bold text-white">Now Playing</h2>
               <div className="bg-slate-600 w-5/6 h-auto">
                 {currentVideo ? (
-                  <div className="">
+                  <div>
                     {playVideo ? (
                       <>
-                        {/* @ts-ignore */}
-                        <div ref={videoPlayerRef} className="w-full " />
-                        {/* <iframe width={"100%"} height={300} src={`https://www.youtube.com/embed/${currentVideo.extractedId}?autoplay=1`} allow="autoplay"></iframe> */}
+                        {/* @ts-expect-error :Types issue */}
+                        <div ref={videoPlayerRef} className="w-full" />
                       </>
                     ) : (
                       <>
-                        <img
-                          src={currentVideo.bigImg}
-                          className="w-full h-72 object-cover rounded"
-                        />
+                        <div className="w-full h-72 object-cover rounded">
+                          <Image
+                            src={currentVideo.bigImg}
+                            alt={`Thumbnail for ${currentVideo.title}`}
+                            width={120} // 30 * 4 (Tailwind's default 1rem = 4px)
+                            height={80} // 20 * 4
+                            className="object-cover rounded"
+                          />
+                        </div>
                         <p className="mt-2 text-center font-semibold text-white">
                           {currentVideo.title}
                         </p>
@@ -318,9 +340,18 @@ export default function Stream({
                   </p>
                 )}
               </div>
-              {playVideo && <button disabled={playNextLoader} onClick={playNext} className="w-full bg-purple-700 hover:bg-purple-800 text-white">
-                            <Play className="mr-2 h-4 w-4" /> {playNextLoader ? "Loading..." : "Play next"}
-                        </button>}
+              {playVideo && (
+                <button
+                  disabled={playNextLoader}
+                  onClick={playNext}
+                  className="w-96 bg-purple-700 hover:bg-purple-800 text-white"
+                >
+                  <div className="flex p-2">
+                    <Play className="ml-28" />{" "}
+                    {playNextLoader ? "Loading..." : "Play next"}
+                  </div>
+                </button>
+              )}
             </div>
           </div>
         </div>
