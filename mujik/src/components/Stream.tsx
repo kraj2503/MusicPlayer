@@ -80,8 +80,8 @@ export default function Stream({
     player.playVideo();
 
     function eventHandler(event: { data: number }) {
-      console.log(event);
-      console.log(event.data);
+      // console.log(event);
+      // console.log(event.data);
       if (event.data === 0) {
         playNext();
       }
@@ -106,7 +106,7 @@ export default function Stream({
         )
         .sort((a, b) => b.upvotes - a.upvotes)
     );
-    console.log(isUpvote);
+    // console.log(isUpvote);
     fetch(`/api/streams/${isUpvote ? "upvote" : "downvote"}`, {
       method: "POST",
       body: JSON.stringify({
@@ -131,7 +131,7 @@ export default function Stream({
         }),
       });
       setQueue([...queue, await res.json()]);
-      console.log(queue);
+      // console.log(queue);
       setLoading(false);
       setInputLink("");
     } else {
@@ -142,7 +142,7 @@ export default function Stream({
 
   const clearQueue = async () => {
     setLoading(true);
-    console.log(loading);
+    // console.log(loading);
     const res = await fetch("api/streams/clearQueue", {
       method: "POST",
       headers: {
@@ -154,7 +154,7 @@ export default function Stream({
       }),
     });
     setQueue(await res.json());
-    console.log(queue);
+    // console.log(queue);
     setLoading(false);
     setInputLink("");
   };
@@ -177,11 +177,11 @@ export default function Stream({
   const handleShare = () => {
     // const shareableLink  = `${window.location.hostname}/creator/${creatorId}`
     const shareableLink = `${window.location.hostname}:3000/creator/${creatorId}`;
-    console.log(shareableLink);
+    // console.log(shareableLink);
     navigator.clipboard
       .writeText(shareableLink)
       .then(() => {
-        console.log("Link copied to clipboard:", shareableLink);
+        // console.log("Link copied to clipboard:", shareableLink);
         alert("Link copied to clipboard!");
       })
       .catch((err) => {

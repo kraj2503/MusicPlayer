@@ -16,7 +16,7 @@ const handler = NextAuth({
       if (!params.user.email) {
         return false;
       }
-      console.log("mail is there",);
+      // console.log("mail is there",);
 
       try {
         await prisma.user.create({

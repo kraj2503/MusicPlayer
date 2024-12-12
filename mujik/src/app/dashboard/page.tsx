@@ -1,10 +1,30 @@
-
 import Stream from "@/components/Stream";
+import { getServerSession } from "next-auth";
+import { prisma } from "../lib/db";
+import { Appbar } from "@/components/Appbar";
 
-const creatorId = "43b03ac6-b0c8-4bde-abc6-e0cdbf967eef"
+export default async function Dashboard() {
+  const session = await getServerSession();
+  if (session?.user?.email) {
+    // console.log(session?.user?.email);
+    const res = await prisma.user.findFirst({
+      where: {
+        email: session?.user?.email,
+      },
+    });
 
-export default function Dashboard(){
+    if (res?.id) {
+      const creatorId = res?.id;
+      // console.log(res);
 
-        return <Stream creatorId={creatorId} playVideo={true}/>
-
+      // console.log(id)
+      return <Stream creatorId={creatorId} playVideo={true} />;
+    }
+  }
+  return (
+    <div>
+      <Appbar />
+      Login
+    </div>
+  );
 }

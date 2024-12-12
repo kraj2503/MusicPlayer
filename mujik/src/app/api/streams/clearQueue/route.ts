@@ -8,13 +8,13 @@ const DeleteStreamSchema = z.object({
 
 export async function POST(req: NextRequest) {
   const data = DeleteStreamSchema.parse(await req.json());
-  console.log("Clearing queue for the id ", data);
+  // console.log("Clearing queue for the id ", data);
   await prisma.stream.deleteMany({
     where: {
       userId: data.creatorId,
     },
   });
-  console.log("Clear step 2 done");
+  // console.log("Clear step 2 done");
 
   return NextResponse.json([]);
 }

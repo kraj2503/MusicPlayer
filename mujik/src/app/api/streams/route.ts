@@ -15,7 +15,7 @@ const MAX_QUEUE_LEN = 20;
 export async function POST(req: NextRequest) {
   try {
     const data = CreateStreamSchema.parse(await req.json());
-    console.log("data", data);
+    // console.log("data", data);
 
     const isYoutube = data.url.match(urlRegex);
     if (!isYoutube) {
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
         }
       );
     }
-    console.log(data.creatorId);
+    // console.log(data.creatorId);
     const stream = await prisma.stream.create({
       data: {
         userId: data.creatorId,
