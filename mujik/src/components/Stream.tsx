@@ -8,6 +8,7 @@ import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import { urlRegex } from "@/app/lib/utils";
 import { ChevronUp, ChevronDown, Play } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 interface Video {
   id: string;
@@ -42,6 +43,9 @@ export default function Stream({
   const [loading, setLoading] = useState(false);
   const [playNextLoader, setPlayNextLoader] = useState(false);
   const videoPlayerRef = useRef<HTMLDivElement>();
+  const { data: session } = useSession();
+
+  const [userId, setUserId] = useState("");
 
   async function refreshStreams() {
     const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
@@ -60,12 +64,30 @@ export default function Stream({
   }
 
   useEffect(() => {
+    if (session) {
+      const userId = session.user?.email;
+
+      if (userId) {
+        console.log("Logged-in User ID:", userId);
+        const loggedUserId = async () => {
+          const response = await fetch("/api/loggedUser/", {
+            method: "POST",
+            body: JSON.stringify({
+              Email: userId,
+            }),
+          });
+          const data = await response.json();
+          setUserId(data.id);
+        };
+        loggedUserId();
+      }
+    }
     refreshStreams();
     const interval = setInterval(() => {
       refreshStreams();
     }, REFRESH_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, []);
+  }, [session]);
 
   useEffect(() => {
     if (!videoPlayerRef.current) {
@@ -128,6 +150,7 @@ export default function Stream({
         body: JSON.stringify({
           creatorId,
           url: inputLink,
+          addedby:userId
         }),
       });
       setQueue([...queue, await res.json()]);
@@ -193,7 +216,7 @@ export default function Stream({
   return (
     <div>
       <Appbar />
-
+{userId}
       <div className="grid grid-cols-2 gap-4">
         {/* Left Section */}
         <div className="col-span-1">

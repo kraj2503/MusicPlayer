@@ -8,6 +8,7 @@ import { getServerSession } from "next-auth";
 const CreateStreamSchema = z.object({
   creatorId: z.string(),
   url: z.string(),
+  addedby: z.string(),
 });
 
 const MAX_QUEUE_LEN = 20;
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
         }
       );
     }
-    const extractedId = isYoutube[1]
+    const extractedId = isYoutube[1];
 
     const res = await youtubesearchapi.GetVideoDetails(extractedId);
     // console.log("Title",yt.title);
@@ -76,17 +77,15 @@ export async function POST(req: NextRequest) {
         title: res.title,
         bigImg: bigImg ?? "",
         smallimg: smallImg ?? "",
-        addedById: data.creatorId,
+        addedById: data.addedby,
       },
     });
-   
 
     return NextResponse.json(
       {
         ...stream,
         hasUpvoted: false,
         upvotes: 1,
-     
       },
       {
         status: 200,

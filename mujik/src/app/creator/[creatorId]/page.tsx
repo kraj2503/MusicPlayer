@@ -8,7 +8,7 @@ export default async function Creator(
     } 
   }
 ) {
-  const creatorId = props.params.creatorId;
+  const creatorId =  props.params.creatorId;
 
   if (!creatorId) {
     return <div>Loading...</div>;

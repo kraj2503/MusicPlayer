@@ -7,31 +7,39 @@ const handler = NextAuth({
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+     
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET??"",
   callbacks: {
     async signIn(params) {
       // console.log("Params: ",params);
-      if (!params.user.email) {
+      if (!params.user || !params.user.email) {
+        console.error("Missing user email in sign-in payload.");
         return false;
       }
-      // console.log("mail is there",);
+      console.log("mail is there",);
 
       try {
-        await prisma.user.create({
-          data: {
+        await prisma.user.upsert({
+          where: { email: params.user.email },
+          update: {}, // Update nothing if user exists
+          create: {
             email: params.user.email,
             provider: "Google",
           },
         });
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
-        // console.log(e);
+        console.error("Error creating user in database:", e);
       }
       return true;
     },
   },
+  // pages: {
+  //   signIn: '/auth/signin'
+    
+  // }
 });
+
 
 export { handler as GET, handler as POST };

@@ -16,9 +16,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
+      <body 
       >
+      <div className="bg-blue-300 h-full">
+
         <Providers>{children}</Providers>
+        </div>
       </body>
     </html>
   );
