@@ -45,7 +45,7 @@ const handler = NextAuth({
                 return false;
              }
         },
-        async session({session, token, user}) {
+        async session({session}) {
             const dbUser = await prisma.user.findUnique({
                 where: {
                     email: session.user.email as string

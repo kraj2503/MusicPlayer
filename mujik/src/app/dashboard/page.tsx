@@ -1,13 +1,11 @@
 "use client";
 import Stream from "@/components/Stream";
 import { useSession } from "next-auth/react";
-import { prisma } from "../lib/db";
 import useRedirect from "@/hooks/useRedirect";
 
 export default function Component() {
   const session = useSession();
-  const redirect = useRedirect();
-
+  useRedirect();
   try {
     if (!session.data?.user.id) {
       return <h1> Login to Continue</h1>;
@@ -18,4 +16,3 @@ export default function Component() {
     return null;
   }
 }
-
