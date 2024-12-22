@@ -1,5 +1,13 @@
-import { Youtube, Share2, ThumbsUp, MessageCircle,  Users, Heart, Zap } from 'lucide-react';
-import Image from 'next/image';
+import {
+  Youtube,
+  Share2,
+  ThumbsUp,
+  MessageCircle,
+  Users,
+  Heart,
+  Zap,
+} from "lucide-react";
+import Image from "next/image";
 
 export default function LandingPage() {
   return (
@@ -17,10 +25,12 @@ export default function LandingPage() {
             />
           </div>
           <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text leading-relaxed  ">
-            Mujik - Share Music Together
+            Muzly - Share Music Together
           </h1>
           <p className="text-xl text-gray-300 max-w-2xl ">
-            A revolutionary platform for sharing and enjoying music together. Create rooms, share your favorite tracks, and let the community decide what plays next.
+            A revolutionary platform for sharing and enjoying music together.
+            Create rooms, share your favorite tracks, and let the community
+            decide what plays next.
           </p>
         </div>
       </div>
@@ -28,7 +38,9 @@ export default function LandingPage() {
       {/* Features Section */}
       <div className="bg-gray-800/50 py-16">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12">Why Choose Mujik?</h2>
+          <h2 className="text-4xl font-bold text-center mb-12">
+            Why Choose Mujik?
+          </h2>
           <div className="grid md:grid-cols-3 gap-8">
             <FeatureCard
               icon={<Share2 className="w-8 h-8" />}
@@ -56,7 +68,7 @@ export default function LandingPage() {
           <h2 className="text-5xl font-bold text-center mb-16 bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">
             Experience Music Together
           </h2>
-          
+
           <div className="grid lg:grid-cols-2 gap-12 ">
             {/* Left Column */}
             <div className="space-y-12">
@@ -73,7 +85,7 @@ export default function LandingPage() {
                 gradient="from-pink-500 to-orange-500"
               />
             </div>
-            
+
             {/* Right Column */}
             <div className="space-y-12 lg:mt-24">
               <FeatureShowcase
@@ -99,7 +111,9 @@ export default function LandingPage() {
         <div className="grid md:grid-cols-4 gap-8">
           {[1, 2, 3, 4].map((step) => (
             <div key={step} className="bg-gray-800/30 p-6 rounded-lg">
-              <div className="text-3xl font-bold text-purple-400 mb-4">Step {step}</div>
+              <div className="text-3xl font-bold text-purple-400 mb-4">
+                Step {step}
+              </div>
               <Image
                 src={`/step${step}.png`}
                 alt={`Step ${step}`}
@@ -107,9 +121,7 @@ export default function LandingPage() {
                 height={200}
                 className="rounded-lg mb-4"
               />
-              <p className="text-gray-300">
-                {getStepDescription(step)}
-              </p>
+              <p className="text-gray-300">{getStepDescription(step)}</p>
             </div>
           ))}
         </div>
@@ -151,9 +163,13 @@ function FeatureCard({ icon, title, description }) {
 function FeatureShowcase({ icon, title, description, gradient }) {
   return (
     <div className="group relative">
-      <div className={`absolute inset-0 bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-10 rounded-xl transition-opacity duration-300`} />
+      <div
+        className={`absolute inset-0 bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-10 rounded-xl transition-opacity duration-300`}
+      />
       <div className="bg-gray-800/40 p-8 rounded-xl backdrop-blur-sm hover:translate-y-[-4px] transition-all duration-300">
-        <div className={`inline-flex p-3 rounded-lg bg-gradient-to-r ${gradient} mb-4`}>
+        <div
+          className={`inline-flex p-3 rounded-lg bg-gradient-to-r ${gradient} mb-4`}
+        >
           {icon}
         </div>
         <h3 className="text-2xl font-bold mb-3">{title}</h3>
@@ -168,8 +184,7 @@ function getStepDescription(step) {
     1: "Create your music room and invite friends",
     2: "Share your favorite tracks from supported platforms",
     3: "Vote for the songs you want to hear next",
-    4: "Chat and enjoy music together in real-time"
+    4: "Chat and enjoy music together in real-time",
   };
   return steps[step];
 }
-
