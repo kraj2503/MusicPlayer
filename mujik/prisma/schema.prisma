@@ -33,6 +33,7 @@ model Stream {
   active      Boolean    @default(true)
   addedById   String
   playedTs    DateTime?
+  createdAt   DateTime   @default(now())
 
   upvotes       Upvote[]
   userId        String

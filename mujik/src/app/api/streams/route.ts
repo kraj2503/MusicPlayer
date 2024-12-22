@@ -5,18 +5,35 @@ import { prisma } from "@/app/lib/db";
 import youtubesearchapi from "youtube-search-api";
 import { urlRegex } from "@/app/lib/utils";
 import { getServerSession } from "next-auth";
+
 const CreateStreamSchema = z.object({
   creatorId: z.string(),
   url: z.string(),
-  addedby: z.string(),
 });
 
 const MAX_QUEUE_LEN = 20;
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getServerSession();
+    const user = await prisma.user.findFirst({
+      where: {
+        email: session?.user?.email ?? "",
+      },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          message: "Unauthenticated",
+        },
+        {
+          status: 403,
+        }
+      );
+    }
+
     const data = CreateStreamSchema.parse(await req.json());
-    // console.log("data", data);
 
     const isYoutube = data.url.match(urlRegex);
     if (!isYoutube) {
@@ -32,8 +49,69 @@ export async function POST(req: NextRequest) {
     const extractedId = isYoutube[1];
 
     const res = await youtubesearchapi.GetVideoDetails(extractedId);
-    // console.log("Title",yt.title);
-    // console.log(res);
+    if (user.id !== data.creatorId) {
+      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+
+      // const userRecentStreams = await prisma.stream.count({
+      //   where: {
+      //     userId: data.creatorId,
+      //     addedById: user.id,
+      //     createdAt: {
+      //       gte: tenMinutesAgo,
+      //     },
+      //   },
+      // });
+
+      const duplicateSong = await prisma.stream.findFirst({
+        where: {
+          userId: data.creatorId,
+          extractedId: extractedId,
+          createdAt: {
+            gte: tenMinutesAgo,
+          },
+        },
+      });
+      if (duplicateSong) {
+        return NextResponse.json(
+          {
+            message: "This song was already added in the last 10 minutes",
+          },
+          {
+            status: 429,
+          }
+        );
+      }
+      const streamsLastTwoMinutes = await prisma.stream.count({
+        where: {
+          userId: data.creatorId,
+          addedById: user.id,
+          createdAt: {
+            gte: twoMinutesAgo,
+          },
+        },
+      });
+      if (streamsLastTwoMinutes >= 2) {
+        return NextResponse.json(
+          {
+            message:
+              "Rate limit exceeded: You can only add 2 songs per 2 minutes",
+          },
+          {
+            status: 429,
+          }
+        );
+      }
+    }
+
+    //     if (userRecentStreams >= 5) {
+    //       return NextResponse.json({
+    //           message: "Rate limit exceeded: You can only add 5 songs per 10 minutes"
+    //       }, {
+    //           status: 429
+    //       });
+    //   }
+    // }
     const thumbnails = res.thumbnail.thumbnails;
     thumbnails.sort((a: { width: number }, b: { width: number }) =>
       a.width < b.width ? -1 : 1
@@ -56,7 +134,7 @@ export async function POST(req: NextRequest) {
         userId: data.creatorId,
       },
     });
-   
+
     if (existingActiveStream > MAX_QUEUE_LEN) {
       return NextResponse.json(
         {
@@ -77,10 +155,10 @@ export async function POST(req: NextRequest) {
         title: res.title,
         bigImg: bigImg ?? "",
         smallimg: smallImg ?? "",
-        addedById: data.addedby,
+        addedById: user.id,
       },
     });
-    await prisma.$disconnect(); 
+    await prisma.$disconnect();
     return NextResponse.json(
       {
         ...stream,
@@ -162,7 +240,7 @@ export async function GET(req: NextRequest) {
       },
     }),
   ]);
- await prisma.$disconnect(); 
+  await prisma.$disconnect();
   return NextResponse.json({
     streams: streams.map(({ _count, ...rest }) => ({
       ...rest,
