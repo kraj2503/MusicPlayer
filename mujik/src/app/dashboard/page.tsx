@@ -1,27 +1,21 @@
+"use client";
 import Stream from "@/components/Stream";
-import { getServerSession } from "next-auth";
+import { useSession } from "next-auth/react";
 import { prisma } from "../lib/db";
+import useRedirect from "@/hooks/useRedirect";
 
-export default async function Dashboard() {
-  const session = await getServerSession();
-  console.log(session);
-  if (session?.user?.email) {
-    // console.log(session?.user?.email);
-    const res = await prisma.user.findFirst({
-      where: {
-        email: session?.user?.email,
-      },
-    });
-    if (res?.id) {
-      const creatorId = res?.id;
+export default function Component() {
+  const session = useSession();
+  const redirect = useRedirect();
 
-      return <Stream creatorId={creatorId} playVideo={true} />;
+  try {
+    if (!session.data?.user.id) {
+      return <h1> Login to Continue</h1>;
     }
+    return <Stream creatorId={session.data.user.id} playVideo={true} />;
+  } catch (e) {
+    console.error(e);
+    return null;
   }
-  return (
-    <div>
-      {/* <Appbar /> */}
-      asd
-    </div>
-  );
 }
+

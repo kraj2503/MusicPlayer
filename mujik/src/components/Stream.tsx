@@ -291,7 +291,7 @@ export default function Stream({
                           {playVideo ? (
                             <div
                               ref={videoPlayerRef}
-                              className="w-full min-h-[480px] aspect-video object-cover"
+                              className="w-full h-full  aspect-video object-cover"
                             />
                           ) : (
                             <div className="space-y-4 p-4">
