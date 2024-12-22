@@ -16,10 +16,10 @@ export default function LandingPage() {
               className="rounded-full"
             />
           </div>
-          <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">
+          <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text leading-relaxed  ">
             Mujik - Share Music Together
           </h1>
-          <p className="text-xl text-gray-300 max-w-2xl">
+          <p className="text-xl text-gray-300 max-w-2xl ">
             A revolutionary platform for sharing and enjoying music together. Create rooms, share your favorite tracks, and let the community decide what plays next.
           </p>
         </div>
@@ -33,7 +33,7 @@ export default function LandingPage() {
             <FeatureCard
               icon={<Share2 className="w-8 h-8" />}
               title="Real-time Music Sharing"
-              description="Share your favorite tracks from YouTube and soon from Spotify & SoundCloud"
+              description="Share your favorite tracks from YouTube"
             />
             <FeatureCard
               icon={<ThumbsUp className="w-8 h-8" />}
@@ -57,7 +57,7 @@ export default function LandingPage() {
             Experience Music Together
           </h2>
           
-          <div className="grid lg:grid-cols-2 gap-12">
+          <div className="grid lg:grid-cols-2 gap-12 ">
             {/* Left Column */}
             <div className="space-y-12">
               <FeatureShowcase
