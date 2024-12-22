@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
         streamId: data.streamId,
       },
     });
-    await prisma.$disconnect(); 
+    await prisma.$disconnect();
     return NextResponse.json(
       {
         message: "Upvoted",
@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         message: "cannot upvote",
+        reason: e.errors,
       },
       {
         status: 411,
