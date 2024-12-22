@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
         userId: data.creatorId,
       },
     });
-
+   
     if (existingActiveStream > MAX_QUEUE_LEN) {
       return NextResponse.json(
         {
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
         addedById: data.addedby,
       },
     });
-    await prisma.$disconnect();
+    await prisma.$disconnect(); 
     return NextResponse.json(
       {
         ...stream,
@@ -162,7 +162,7 @@ export async function GET(req: NextRequest) {
       },
     }),
   ]);
-  await prisma.$disconnect();
+ await prisma.$disconnect(); 
   return NextResponse.json({
     streams: streams.map(({ _count, ...rest }) => ({
       ...rest,

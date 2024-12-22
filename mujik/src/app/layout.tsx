@@ -15,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full" >
-      <body className="bg-gray-900 min-h-screen text-white overflow-hidden">
+      <body className=" bg-gray-900 min-h-screen text-white ">
         <Providers>
           <Appbar />
           {children}

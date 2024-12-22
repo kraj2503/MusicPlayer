@@ -2,26 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+html, body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
-  overflow: hidden; /* Add this line */
-}
-
-/* Keep existing scrollbar hiding code */
-body::-webkit-scrollbar {
-  display: none;
+  overflow: hidden; /* Prevent scrollbars on the whole page */
+  height: 100%; /* Ensure body takes up full height */
 }
 
 body {
-  -ms-overflow-style: none; /* IE and Edge */
+  overflow: auto; /* Allow scrolling */
+}
+
+/* Hide the scrollbar for all browsers */
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, and Opera */
+}
+
+html, body {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
 }
 
-/* Keep existing custom-scrollbar class for specific sections */
+/* Optional: For custom sections, keep the custom-scrollbar class as is */
 .custom-scrollbar::-webkit-scrollbar {
-  display: none;
+  display: none; /* Hide scrollbar in specific sections */
 }
 
 .custom-scrollbar {
@@ -29,6 +34,7 @@ body {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
+
 
 .contain-paint {
   contain: paint;
