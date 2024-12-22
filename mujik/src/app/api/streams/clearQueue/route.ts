@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
       userId: data.creatorId,
     },
   });
+  await prisma.$disconnect(); 
   // console.log("Clear step 2 done");
 
   return NextResponse.json([]);

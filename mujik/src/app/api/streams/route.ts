@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
         addedById: data.addedby,
       },
     });
-
+    await prisma.$disconnect();
     return NextResponse.json(
       {
         ...stream,
@@ -162,7 +162,7 @@ export async function GET(req: NextRequest) {
       },
     }),
   ]);
-
+  await prisma.$disconnect();
   return NextResponse.json({
     streams: streams.map(({ _count, ...rest }) => ({
       ...rest,

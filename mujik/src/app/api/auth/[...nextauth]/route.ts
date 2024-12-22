@@ -29,6 +29,7 @@ const handler = NextAuth({
             provider: "Google",
           },
         });
+        await prisma.$disconnect(); 
       } catch (e) {
         console.error("Error creating user in database:", e);
       }

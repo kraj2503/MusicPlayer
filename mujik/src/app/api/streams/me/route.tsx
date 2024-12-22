@@ -36,7 +36,7 @@ export async function GET() {
       },
     },
   });
-
+  await prisma.$disconnect(); 
   return NextResponse.json({
     streams: streams.map(({ _count, ...rest }) => ({
       ...rest,

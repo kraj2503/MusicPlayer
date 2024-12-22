@@ -57,7 +57,7 @@ export async function GET() {
       },
     }),
   ]);
-
+  await prisma.$disconnect(); 
   return NextResponse.json({
     stream: mostUpvotedStream,
   });

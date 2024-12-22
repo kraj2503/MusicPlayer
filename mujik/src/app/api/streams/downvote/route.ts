@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
         },
       },
     });
+    await prisma.$disconnect(); 
     return NextResponse.json(
       {
         message: "Down voted",
