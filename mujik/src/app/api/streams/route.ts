@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
     const extractedId = isYoutube[1];
 
     const res = await youtubesearchapi.GetVideoDetails(extractedId);
+    console.log("youtubesearchapi",res);
     if (user.id !== data.creatorId) {
       const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
       const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
