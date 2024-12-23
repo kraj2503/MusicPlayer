@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import YouTubePlayer from "youtube-player";
 import Image from "next/image";
 // import LiteYouTubeEmbed from "react-lite-youtube-embed";
-import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
+// import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import { urlRegex } from "@/app/lib/utils";
 import { ChevronUp, SkipForward, Equal } from "lucide-react";
 import { useSession } from "next-auth/react";

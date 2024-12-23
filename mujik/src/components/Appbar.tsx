@@ -7,7 +7,7 @@ export function Appbar() {
   const pathname = usePathname();
   const session = useSession();
   return (
-    <nav className=" w-full bg-gray-900 text-white p-4 shadow-lg border-b border-gray-700 ">
+    <nav className=" px-14 w-full bg-gray-900 text-white p-4 shadow-lg border-b border-gray-700 ">
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo */}
         <div className="text-2xl font-bold font-mono tracking-wide">Muzly</div>

@@ -15,15 +15,15 @@ export default function LandingPage() {
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="flex flex-col items-center text-center space-y-8">
-          <div className="w-32 h-32 relative">
+          {/* <div className="w-34 h-32 relative bg-white rounded-full">
             {/* Add your logo here */}
-            <Image
+            {/* <Image
               src="/logo.png"
-              alt="Mujik Logo"
+              alt="Muzly Logo"
               layout="fill"
               className="rounded-full"
             />
-          </div>
+          </div> */}
           <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text leading-relaxed  ">
             Muzly - Share Music Together
           </h1>
@@ -39,7 +39,7 @@ export default function LandingPage() {
       <div className="bg-gray-800/50 py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-bold text-center mb-12">
-            Why Choose Mujik?
+            Why Choose Muzly?
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             <FeatureCard
@@ -115,7 +115,7 @@ export default function LandingPage() {
                 Step {step}
               </div>
               <Image
-                src={`/step${step}.png`}
+                src={`/step_${step}.png`}
                 alt={`Step ${step}`}
                 width={300}
                 height={200}
@@ -140,12 +140,12 @@ export default function LandingPage() {
       </div>
 
       {/* CTA Section */}
-      <div className="container mx-auto px-4 py-16 text-center">
+      {/* <div className="container mx-auto px-4 py-16 text-center">
         <h2 className="text-4xl font-bold mb-8">Ready to Start Sharing?</h2>
         <button className="bg-gradient-to-r from-purple-500 to-pink-500 px-8 py-4 rounded-full text-xl font-bold hover:opacity-90 transition-opacity">
           Create Your Room
         </button>
-      </div>
+      </div> */}
     </div>
   );
 }
