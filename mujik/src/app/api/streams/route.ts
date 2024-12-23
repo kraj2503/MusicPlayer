@@ -16,12 +16,13 @@ const MAX_QUEUE_LEN = 20;
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession();
+    console.log("session",session);
     const user = await prisma.user.findFirst({
       where: {
         email: session?.user?.email ?? "",
       },
     });
-
+    console.log("user",user);
     if (!user) {
       return NextResponse.json(
         {

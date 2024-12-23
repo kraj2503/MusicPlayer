@@ -129,35 +129,51 @@ export default function Stream({
     // console.log(isUpvote);
     fetch(`/api/streams/${isUpvote ? "upvote" : "downvote"}`, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json", // Specify the content type
+      },
       body: JSON.stringify({
         streamId: id,
       }),
     });
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (inputLink && inputLink.match(urlRegex)) {
       setLoading(true);
-      const res = await fetch("/api/streams/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json", // Add this header
-        },
-        body: JSON.stringify({
-          creatorId,
-          url: inputLink,
-          addedby: userId,
-        }),
-      });
-      setQueue([...queue, await res.json()]);
-      // console.log(queue);
-      setLoading(false);
-      setInputLink("");
+
+      try {
+        const res = await fetch("/api/streams/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json", // Add this header
+          },
+          body: JSON.stringify({
+            creatorId,
+            url: inputLink,
+            addedby: userId,
+          }),
+        });
+        console.log(res);
+        if (res.ok) {
+          const newStream = await res.json();
+          setQueue([...queue, newStream]);
+          setInputLink("");
+        } else {
+          
+          const errorMessage = await res.json();
+          console.error("Failed to add stream:", errorMessage);
+          alert(`Error: ${errorMessage.message}`);
+        }
+      } catch (error) {
+        console.error("Error adding stream:", error);
+        alert(`Error: ${error}`);
+      } finally {
+        setLoading(false);
+      }
     } else {
       alert("Invalid link");
-      return;
     }
   };
 

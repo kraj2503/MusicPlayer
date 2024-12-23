@@ -8,11 +8,11 @@ export default function SignInPage() {
     e.preventDefault();
 
     try {
-      const res = await signIn("google", {
+       await signIn("google", {
         redirect: true,
         callbackUrl: "/dashboard",
       });
-      console.log(res);
+      // console.log(res);
     } catch (err) {
       return <>Error Signing in {err}</>;
     }
