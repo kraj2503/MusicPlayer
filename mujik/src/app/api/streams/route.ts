@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/app/lib/db";
-//@ts-expect-error : Types not available
-import youtubesearchapi from "youtube-search-api";
 import { urlRegex } from "@/app/lib/utils";
 import { getServerSession } from "next-auth";
+import axios from "axios";
 
 const CreateStreamSchema = z.object({
   creatorId: z.string(),
@@ -49,8 +48,29 @@ export async function POST(req: NextRequest) {
     }
     const extractedId = isYoutube[1];
 
-    const res = await youtubesearchapi.GetVideoDetails(extractedId);
-    console.log("youtubesearchapi",res);
+
+    // console.log('searching for video',extractedId);
+    const res = await axios.get(
+      `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${extractedId}&format=json`
+    );
+
+  //   console.log( {
+  //     title: res.data.title,
+  //     thumbnail: `https://img.youtube.com/vi/${extractedId}/maxresdefault.jpg`,
+  //     thumbnailOptions: {
+  //       default: `https://img.youtube.com/vi/${extractedId}/default.jpg`,
+  //       medium: `https://img.youtube.com/vi/${extractedId}/mqdefault.jpg`,
+  //       high: `https://img.youtube.com/vi/${extractedId}/hqdefault.jpg`,
+  //       maxRes: `https://img.youtube.com/vi/${extractedId}/maxresdefault.jpg`
+  //     }
+  //   }
+  // );
+
+
+
+  // console.log('DONE');
+
+    // const res = await youtubesearchapi.GetVideoDetails(extractedId);
     if (user.id !== data.creatorId) {
       const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
       const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
@@ -114,10 +134,10 @@ export async function POST(req: NextRequest) {
     //       });
     //   }
     // }
-    const thumbnails = res.thumbnail.thumbnails;
-    thumbnails.sort((a: { width: number }, b: { width: number }) =>
-      a.width < b.width ? -1 : 1
-    );
+    // const thumbnails = res.thumbnail.thumbnails;
+    // thumbnails.sort((a: { width: number }, b: { width: number }) =>
+    //   a.width < b.width ? -1 : 1
+    // );
 
     // if (res.thumbnail && res.thumbnail.thumbnails) {
     //   thumbnail = res.thumbnail.thumbnails;
@@ -126,10 +146,10 @@ export async function POST(req: NextRequest) {
     //   // Sort the thumbnails by width
     // }
 
-    const bigImg =
-      thumbnails.length > 0 ? thumbnails[thumbnails.length - 1].url : "";
-    const smallImg =
-      thumbnails.length > 1 ? thumbnails[thumbnails.length - 2].url : bigImg;
+    // const bigImg =
+    //   thumbnails.length > 0 ? thumbnails[thumbnails.length - 1].url : "";
+    // const smallImg =
+    //   thumbnails.length > 1 ? thumbnails[thumbnails.length - 2].url : bigImg;
 
     const existingActiveStream = await prisma.stream.count({
       where: {
@@ -154,9 +174,9 @@ export async function POST(req: NextRequest) {
         url: data.url,
         extractedId,
         type: "Youtube",
-        title: res.title,
-        bigImg: bigImg ?? "",
-        smallimg: smallImg ?? "",
+        title: res.data.title,
+        bigImg: `https://img.youtube.com/vi/${extractedId}/maxresdefault.jpg`,
+        smallimg: `https://img.youtube.com/vi/${extractedId}/mqdefault.jpg`,
         addedById: user.id,
       },
     });

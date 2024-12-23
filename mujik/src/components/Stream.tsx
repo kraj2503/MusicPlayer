@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import YouTubePlayer from "youtube-player";
 import Image from "next/image";
-import LiteYouTubeEmbed from "react-lite-youtube-embed";
+// import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import { urlRegex } from "@/app/lib/utils";
 import { ChevronUp, SkipForward, Equal } from "lucide-react";
@@ -275,7 +275,13 @@ export default function Stream({
                               <div className="text-center text-white font-semibold text-lg">
                                 Video Thumbnail
                               </div>
-                              <LiteYouTubeEmbed id={videoId} title={""} />
+                              <Image
+                                src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
+                                alt="Thumbnail"
+                                width={480}
+                                height={320}
+                                className="rounded-lg"
+                              />
                             </div>
                           </div>
                         );
